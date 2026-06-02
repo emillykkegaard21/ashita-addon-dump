@@ -1,0 +1,12 @@
+# Ignore everything in the repo root by default...
+/*
+
+# ...but keep these folders (and everything inside them)
+!/addons/
+!/config/
+!/plugins/
+!/polplugins/
+!/scripts/
+
+# keep this file itself tracked
+!/.gitignore

@@ -1,0 +1,94 @@
+local mob_entities = {}
+local tracker = require('src.tracker')
+local utils = require('src.utils')
+local imgui = require('imgui')
+local map = require('src.map')
+local tooltip = require('src.overlays.tooltip')
+
+local mob_entities = {}
+
+function mob_entities.draw(contextConfig, mapData, windowPosX, windowPosY, contentMinX, contentMinY, mapOffsetX, mapOffsetY, mapZoom, textureWidth, contextAlpha, contextLabels)
+    contextConfig = contextConfig or boussole.config
+    contextAlpha = contextAlpha or 1.0
+    local showLabels
+    if contextLabels ~= nil then
+        showLabels = contextLabels
+    else
+        showLabels = contextConfig.showLabels[1]
+    end
+    showLabels = showLabels and (contextConfig.showMobEntityLabels == nil or contextConfig.showMobEntityLabels[1])
+    if not contextConfig.showMobEntities[1] or not mapData or not mapData.entry then
+        return
+    end
+
+    local nearbyEntities = tracker.get_mob_entities()
+    local trackerEntities = tracker.get_tracked_entities()
+    local activeEntities = tracker.get_active_entities()
+
+    local iconSize = contextConfig.iconSizeMobEntity and contextConfig.iconSizeMobEntity[1] or 6
+    local drawList = imgui.GetWindowDrawList()
+
+    local zone = AshitaCore:GetMemoryManager():GetParty():GetMemberZone(0)
+    local trackerEnabled = contextConfig.enableTracker and contextConfig.enableTracker[1]
+
+    for id, entity in pairs(nearbyEntities) do
+        if entity and entity.draw and entity.zoneId == zone and not (trackerEnabled and trackerEntities[id]) then
+            local enemyEntity = entity.index and GetEntity(entity.index) or nil
+            local targetPosition = nil
+            local canDrawEntity = enemyEntity == nil or utils.is_entity_rendered(enemyEntity)
+
+            local activePos = activeEntities[id]
+            if activePos and canDrawEntity then
+                targetPosition = { x = activePos.x, y = activePos.y, z = activePos.z }
+            elseif canDrawEntity and enemyEntity ~= nil then
+                -- Fallback to entity position if not in cache
+                targetPosition = {
+                    x = enemyEntity.Movement.LocalPosition.X,
+                    y = enemyEntity.Movement.LocalPosition.Y,
+                    z = enemyEntity.Movement.LocalPosition.Z,
+                }
+            end
+
+            if targetPosition ~= nil then
+                -- Convert world coordinates to map coordinates
+                local mapX, mapY = map.world_to_map_coords(mapData.entry, targetPosition.x, targetPosition.y, targetPosition.z)
+                if mapX ~= nil and mapY ~= nil then
+                    -- Convert map coordinates to texture coordinates
+                    local texX, texY
+                    if mapData.entry._isCustomMap then
+                        texX = (mapX - mapData.entry.OffsetX) * (textureWidth / mapData.entry._customData.referenceSize)
+                        texY = (mapY - mapData.entry.OffsetY) * (textureWidth / mapData.entry._customData.referenceSize)
+                    else
+                        texX = (mapX - mapData.entry.OffsetX) * (textureWidth / 512.0)
+                        texY = (mapY - mapData.entry.OffsetY) * (textureWidth / 512.0)
+                    end
+
+                    -- Convert texture coordinates to screen coordinates
+                    local screenX = windowPosX + contentMinX + mapOffsetX + texX * mapZoom
+                    local screenY = windowPosY + contentMinY + mapOffsetY + texY * mapZoom
+
+                    local colorU32 = utils.mul_alpha(utils.rgb_to_abgr(contextConfig.colorMobEntity), contextAlpha)
+
+                    utils.draw_circle_marker(drawList, screenX, screenY, iconSize, colorU32, utils.mul_alpha(0xFF000000, contextAlpha), 2.0)
+
+                    -- Add to tooltip if hovering
+                    local mousePosX, mousePosY = imgui.GetMousePos()
+                    local distance = math.sqrt((mousePosX - screenX) ^ 2 + (mousePosY - screenY) ^ 2)
+
+                    if distance <= iconSize + 5 then
+                        local displayName = entity.alias or entity.name
+                        tooltip.add_line(displayName, colorU32)
+                    end
+
+                    -- Draw label above marker if showLabels is enabled
+                    if showLabels then
+                        local displayName = entity.alias or entity.name
+                        utils.draw_label(drawList, displayName, screenX, screenY, iconSize, colorU32, contextAlpha)
+                    end
+                end
+            end
+        end
+    end
+end
+
+return mob_entities
