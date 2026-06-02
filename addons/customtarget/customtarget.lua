@@ -10,14 +10,29 @@ local d3d8dev           = d3d.get_device()
 local ffi               = require('ffi')
 local C                 = ffi.C
 
--- * Edit this part to match your custom cursor * --
-local filepathForCursor = 'edit/cursor.png'
-local filepathForCursorSub = 'edit/subcursor.png'
-local cursorWidth       = 30 -- Width of the image
-local cursorHeight      = 20 -- Height of the image
+-- * Edit this part to match your custom cursors * --
+-- Both cursors are animated horizontal sprite-sheet strips:
+-- each frame is cursorWidth x cursorHeight, laid out left-to-right.
+-- The supplied strips were generated from the .ani files in playback
+-- order, so a uniform fps reproduces the original animation.
+
+-- Main (target) cursor -- white
+local filepathForCursor    = 'edit/arw_s.png'   -- 4-frame strip (128x32)
+local cursorFrames         = 4                  -- number of frames in the strip
+local cursorFps            = 8           -- frames per second (~0.3s each)
+
+-- Sub (subtarget) cursor -- golden
+local filepathForCursorSub = 'edit/oarw_s.png'  -- 4-frame strip (128x32)
+local cursorFramesSub      = 4
+local cursorFpsSub         = 8
+
+-- Size of a SINGLE frame (both strips use 32x32 cells)
+local cursorWidth          = 32
+local cursorHeight         = 32
 -- * ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ * --
 
 local cursorRect        = ffi.new('RECT', { 0, 0, cursorWidth, cursorHeight })
+local cursorRectSub     = ffi.new('RECT', { 0, 0, cursorWidth, cursorHeight })
 local white             = d3d.D3DCOLOR_ARGB(255, 255, 255, 255)
 local cursorPos         = ffi.new('D3DXVECTOR2', { 0, 0 })
 local cursorPosSub      = ffi.new('D3DXVECTOR2', { 0, 0 })
@@ -29,6 +44,14 @@ local cursorTexSub
 local _, viewport = d3d8dev:GetViewport()
 local width       = viewport.Width
 local height      = viewport.Height
+
+-- advance a source rectangle to the current animation frame within a strip
+local function setFrameRect(rect, frames, fps)
+    local f = math.floor(os.clock() * fps) % frames
+    rect.left  = f * cursorWidth
+    rect.right = rect.left + cursorWidth
+    -- top (0) and bottom (cursorHeight) never change for a horizontal strip
+end
 
 local function matrixMultiply(m1, m2)
     return ffi.new('D3DXMATRIX', {
@@ -204,6 +227,10 @@ ashita.events.register('load', 'loac_cb', function()
         cursorTex = cursorTex or loadCursorTex(filepathForCursor)
         cursorTexSub = cursorTexSub or loadCursorTex(filepathForCursorSub)
 
+        -- Advance the animation frames for this present
+        setFrameRect(cursorRect, cursorFrames, cursorFps)
+        setFrameRect(cursorRectSub, cursorFramesSub, cursorFpsSub)
+
         -- Get target cursor position
         local ndcZ = nil
         cursorPos.x, cursorPos.y, ndcZ = getPos(targetIndex)
@@ -213,8 +240,8 @@ ashita.events.register('load', 'loac_cb', function()
             local flags = target:GetSubTargetFlags()
 
             -- Draw the target cursor
-            if ((flags == 512 or flags == 18 or flags == 525) and not targetIndexSub) then -- Hack to get items to display a blue target instead of a white one for items, stnpc, and stpc
-                sprite:Draw(cursorTexSub, cursorRect, cursorScale, nil, 0.0, cursorPos, white)
+            if ((flags == 512 or flags == 18 or flags == 525) and not targetIndexSub) then -- Hack to get items to display a gold target instead of a white one for items, stnpc, and stpc
+                sprite:Draw(cursorTexSub, cursorRectSub, cursorScale, nil, 0.0, cursorPos, white)
             else
                 sprite:Draw(cursorTex, cursorRect, cursorScale, nil, 0.0, cursorPos, white)
             end
@@ -231,7 +258,7 @@ ashita.events.register('load', 'loac_cb', function()
             -- Test if subtarget cursor is in the viewing volume
             if (ndcZSub >= 0 and ndcZSub <= 1) then
                 -- Draw the subtarget cursor
-                sprite:Draw(cursorTexSub, cursorRect, cursorScale, nil, 0.0, cursorPosSub, white)
+                sprite:Draw(cursorTexSub, cursorRectSub, cursorScale, nil, 0.0, cursorPosSub, white)
             end
 
         end
