@@ -269,12 +269,6 @@ minimapcontrol.update_visiblity = function()
         return
     end
 
-    -- Hide if in combat
-    if not minimapcontrol.settings.show_when.in_combat and not minimapcontrol.is_mounted() and (minimapcontrol.combat_engaged or #minimapcontrol.enemy_list > 0) then
-        minimapcontrol.visible = false
-        return
-    end
-
     -- Hide if chat expanded
     if not minimapcontrol.settings.show_when.chat_expanded and is_chat_expanded() then
         minimapcontrol.visible = false
