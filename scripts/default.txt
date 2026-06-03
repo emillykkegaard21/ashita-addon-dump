@@ -39,12 +39,13 @@
 /addon load noname
 /addon load isntantchat
 /addon load minimapcontrol
-/addon load hideparty
 /addon load xiui
 /addon load mobdb
-/addon load customtarget
 /addon load chains
 /addon load simplelog
+/addon load hideparty
+/addon load customtarget
+/addon load statustimers
 
 
 ##########################################################################

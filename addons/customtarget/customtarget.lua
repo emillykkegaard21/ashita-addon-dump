@@ -13,18 +13,17 @@ local C                 = ffi.C
 -- * Edit this part to match your custom cursors * --
 -- Both cursors are animated horizontal sprite-sheet strips:
 -- each frame is cursorWidth x cursorHeight, laid out left-to-right.
--- The supplied strips were generated from the .ani files in playback
--- order, so a uniform fps reproduces the original animation.
+-- anc_orig_6frame.png / anc_gold_6frame.png are 6-frame strips (192x32).
 
--- Main (target) cursor -- white
-local filepathForCursor    = 'edit/arw_s.png'   -- 4-frame strip (128x32)
-local cursorFrames         = 4                  -- number of frames in the strip
-local cursorFps            = 8           -- frames per second (~0.3s each)
+-- Main (target) cursor
+local filepathForCursor    = 'edit/anc_gold_6frame.png'  -- 6-frame strip (192x32)
+local cursorFrames         = 6                            -- number of frames in the strip
+local cursorFps            = 12                 -- frames per second
 
--- Sub (subtarget) cursor -- golden
-local filepathForCursorSub = 'edit/oarw_s.png'  -- 4-frame strip (128x32)
-local cursorFramesSub      = 4
-local cursorFpsSub         = 8
+-- Sub (subtarget) cursor
+local filepathForCursorSub = 'edit/anc_azure_6frame.png'  -- 6-frame strip (192x32)
+local cursorFramesSub      = 6
+local cursorFpsSub         = 12
 
 -- Size of a SINGLE frame (both strips use 32x32 cells)
 local cursorWidth          = 32
@@ -44,6 +43,19 @@ local cursorTexSub
 local _, viewport = d3d8dev:GetViewport()
 local width       = viewport.Width
 local height      = viewport.Height
+
+-- Detect when an in-game event / cutscene is playing (reused from minimapcontrol)
+local pEventSystem = ashita.memory.find('FFXiMain.dll', 0, 'A0????????84C0741AA1????????85C0741166A1????????663B05????????0F94C0C3', 0, 0)
+local function is_event_system_active()
+    if pEventSystem == 0 then
+        return false
+    end
+    local ptr = ashita.memory.read_uint32(pEventSystem + 1)
+    if ptr == 0 then
+        return false
+    end
+    return ashita.memory.read_uint8(ptr) == 1
+end
 
 -- advance a source rectangle to the current animation frame within a strip
 local function setFrameRect(rect, frames, fps)
@@ -205,6 +217,11 @@ ashita.events.register('load', 'loac_cb', function()
     local sprite = loadSprite()
 
     ashita.events.register('d3d_present', 'present_cb', function()
+        -- Hide the cursor during cutscenes / events
+        if is_event_system_active() then
+            return
+        end
+
         -- Save the target manager for ease of use
         local target = AshitaCore:GetMemoryManager():GetTarget()
 

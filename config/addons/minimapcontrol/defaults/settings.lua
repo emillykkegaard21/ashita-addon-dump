@@ -22,11 +22,12 @@ settings["opacity"]["npcs"] = 1;
 settings["opacity"]["players"] = 1;
 settings["opacity"]["monsters"] = 1;
 settings["opacity"]["map"] = 1;
+settings["zoom"][261] = "0.200000";
 settings["zoom"][119] = "1.000000";
-settings["zoom"][230] = "1.000000";
 settings["zoom"][288] = "0.400000";
 settings["zoom"][150] = "0.500000";
-settings["zoom"][257] = "1.400000";
+settings["zoom"][230] = "0.800000";
+settings["zoom"][257] = "1.600000";
 settings["zoom"][232] = "1.000000";
 
 return settings;
