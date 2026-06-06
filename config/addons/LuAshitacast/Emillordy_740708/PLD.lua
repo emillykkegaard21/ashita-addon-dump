@@ -1,5 +1,5 @@
 local profile = {};
-
+gcinclude = gFunc.LoadFile('common\\gcinclude.lua');
 ------------------------------------------------------------
 -- Gear sets
 -- You only have these three for now. Everything below this

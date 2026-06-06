@@ -33,6 +33,8 @@
 /addon load move
 /addon load aspect
 /addon load timestamp
+/addon load drawdistance
+/addon load chatmon
 /addon load castdelay
 /addon load auctioneer
 /addon load pivot
@@ -90,6 +92,11 @@
 /wait 3
 ##########################################################################
 
+/fps 0
 /ambient 255 255 255
-/fps 1
+/drawdistance setworld 10
+/drawdistance setmob 10
+/drawdistance setentity 10
 /hideparty hide
+/pivot add remapster
+/pivot add ffxi-remapster-labeled-main
