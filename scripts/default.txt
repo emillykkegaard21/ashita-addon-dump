@@ -25,6 +25,9 @@
 /load minimap
 /load PacketFlow
 /load Bellhop
+/load lootwhore
+/load nameplate
+/load uberwarp
 
 /addon load fps
 /addon load move
@@ -46,6 +49,8 @@
 /addon load hideparty
 /addon load customtarget
 /addon load statustimers
+/addon load luashitacast
+/addon load equipmon
 
 
 ##########################################################################

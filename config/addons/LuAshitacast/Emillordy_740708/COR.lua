@@ -1,559 +1,238 @@
+--[[
+    Corsair (COR) profile for LuAshitacast (Ashita v4).
+
+    Building / updating sets in game:
+      - This profile enables addset, so you can capture your currently
+        equipped gear into a set with:
+            /lac addset SetName
+      - To preview an existing set without engaging:
+            /lac set Tp_Default       (equips it for a few seconds)
+      - /lac reload   reloads this file after you edit it.
+      - /lac debug on  prints every swap so you can see what is equipping.
+
+    Slot names (GearSwap -> LuAshitacast):
+        main -> Main        sub -> Sub          range -> Range      ammo -> Ammo
+        head -> Head        neck -> Neck        left_ear -> Ear1    right_ear -> Ear2
+        body -> Body        hands -> Hands      left_ring -> Ring1  right_ring -> Ring2
+        back -> Back        waist -> Waist      legs -> Legs        feet -> Feet
+
+    Augment format (GearSwap -> LuAshitacast):
+        { name="X", augments={'A','B',} }
+        becomes
+        { Name = 'X', Augment = { [1] = 'A', [2] = 'B' } }
+]]
+
 local profile = {};
-gcinclude = gFunc.LoadFile('common\\gcinclude.lua');
 
 local sets = {
-    Idle = {
-        Main = 'Naegling',
-        Range = 'Death Penalty',
-        Ammo = 'Decimating Bullet',
-        Head = 'Malignance Chapeau',
-        Neck = 'Loricate Torque +1',
-        Ear1 = 'Eabani Earring',
-        Ear2 = 'Etiolation Earring',
-        Body = 'Nyame Mail',
-        Hands = 'Malignance Gloves',
-        Ring1 = 'Defending Ring',
-        Ring2 = 'Karieyh Ring +1',
-        Back = 'Solemnity Cape',
-        Waist = 'Flume Belt +1',
-        Legs = 'Nyame Flanchard',
-        Feet = 'Nyame Sollerets',
-    },
-    Idle_TPgun = {
-        Main = 'Naegling',
-        Range = 'Anarchy +2',
-    },
-    Resting = {},
-    Idle_Regen = {
-        Head = 'Meghanada Visor +2',
-        Neck = 'Bathy Choker +1',
-        Ear1 = 'Infused Earring',
-        Body = 'Meg. Cuirie +2',
-        Ring2 = 'Chirich Ring +1',
-        Legs = 'Meg. Chausses +2',
-        Feet = 'Meg. Jam. +2',
-    },
-    Idle_Refresh = {
-        Head = 'Rawhide Mask',
-        Ring1 = 'Stikini Ring +1',
-    },
-    Town = {
-        Main = 'Naegling',
-        Sub = 'Nusku Shield',
-        Range = 'Death Penalty',
-        Ammo = 'Living Bullet',
-        Head = 'Chass. Tricorne +1',
-        Neck = 'Bathy Choker +1',
-        Body = 'Chasseur\'s Frac +1',
-        Hands = 'Malignance Gloves',
-        Ring1 = 'Stikini Ring +1',
-        Ring2 = 'Chirich Ring +1',
-        Legs = 'Carmine Cuisses +1',
-        Feet = 'Chass. Bottes +1',
-    },
+    ------------------------------------------------------------
+    -- Idle: gear to stand around in (regen / refresh works well).
+    -- Uncomment this set AND the matching line in HandleDefault to use it.
+    ------------------------------------------------------------
+    -- Idle = {
+    -- },
 
-    Dt = {
-        Head = 'Nyame Helm',
-        Neck = { Name = 'Loricate Torque +1', AugPath='A' },
-        Ear1 = { Name = 'Odnowa Earring +1', AugPath='A' },
-        Ear2 = 'Etiolation Earring',
-        Body = 'Nyame Mail',
-        Hands = 'Nyame Gauntlets',
-        Ring1 = 'Defending Ring',
-        Ring2 = { Name = 'Gelatinous Ring +1', AugPath='A' },
-        Back = 'Solemnity Cape',
-        Waist = 'Flume Belt +1',
-        Legs = 'Nyame Flanchard',
-        Feet = 'Nyame Sollerets',
-    },
-
+    ------------------------------------------------------------
+    -- TP Set (engaged / melee). Do not put anything here that resets TP.
+    ------------------------------------------------------------
     Tp_Default = {
-        Ammo = 'Decimating Bullet',
-        Head = 'Adhemar Bonnet +1',
+        Ammo = 'Bronze Bullet',
+        Head = 'Mummu Bonnet +1',
+        Body = 'Mummu Jacket +1',
+        Hands = 'Mummu Wrists +1',
+        Legs = 'Mummu Kecks +1',
+        Feet = 'Mummu Gamash. +1',
         Neck = 'Sanctity Necklace',
-        Ear1 = 'Telos Earring',
-        Ear2 = 'Eabani Earring',
-        Body = 'Herculean Vest',
-        Hands = 'Adhemar Wrist. +1',
-        Ring1 = 'Petrov Ring',
-        Ring2 = 'Epona\'s Ring',
-        Back = 'Solemnity Cape',
-        Waist = { Name = 'Sailfi Belt +1', AugPath='A' },
-        Legs = 'Samnuha Tights',
-        Feet = { Name = 'Herculean Boots', Augment = { [1] = 'Accuracy+20', [2] = 'Attack+6', [3] = 'AGI+1', [4] = '"Triple Atk."+3' } },
-    },
-    Tp_Hybrid = {
-        Head = 'Malignance Chapeau',
-        Neck = 'Comm. Charm +1',
-        Hands = 'Malignance Gloves',
-    },
-    Tp_Acc = {
-        Head = 'Malignance Chapeau',
-        Body = 'Nyame Mail',
-        Hands = 'Malignance Gloves',
-        Ring1 = 'Cacoethic Ring +1',
-        Ring2 = 'Chirich Ring +1',
-    },
-
-
-    Precast = {
-        Neck = 'Baetyl Pendant',
-        Ear2 = 'Etiolation Earring',
-        Body = 'Taeon Tabard',
-        Hands = 'Leyline Gloves',
-        Ring1 = 'Prolix Ring',
-        Feet = 'Carmine Greaves +1',--8
-    },
-
-
-    Cure = {
-        Neck = 'Incanter\'s Torque',
-        Ear1 = 'Mendi. Earring',
-        Ring1 = 'Stikini Ring +1',
-        Ring2 = { Name = 'Metamor. Ring +1', AugPath='A' },
-        Back = 'Solemnity Cape',
-        Legs = 'Carmine Cuisses +1',
-    },
-
-    Enhancing = {
-        Neck = 'Incanter\'s Torque',
-        Ear1 = 'Mendi. Earring',
-        Ear2 = 'Andoaa Earring',
-        Ring2 = { Name = 'Metamor. Ring +1', AugPath='A' },
-    },
-
-    Enfeebling = {
-        Neck = 'Erra Pendant',
-        Ring2 = { Name = 'Metamor. Ring +1', AugPath='A' },
-    },
-    Macc = {},
-
-    Drain = {
-        Neck = 'Erra Pendant',
-        Ring2 = { Name = 'Metamor. Ring +1', AugPath='A' },
-    },
-
-    Nuke = {
-        Head = 'Nyame Helm',
-        Neck = 'Baetyl Pendant',
-        Ear1 = 'Friomisi Earring',
-        Ear2 = 'Crematio Earring',
-        Body = 'Nyame Mail',
-        Hands = 'Nyame Gauntlets',
-        Ring1 = 'Shiva Ring +1',
-        Ring2 = { Name = 'Metamor. Ring +1', AugPath='A' },
-        Legs = 'Nyame Flanchard',
-        Feet = 'Nyame Sollerets',
-    },
-
-    Preshot = {--base preshot, no flurry, 70cap, 10 from gifts (only 1200 JP needed)
-        Ammo = 'Decimating Bullet',
-        Head = 'Chass. Tricorne +1',
-        Neck = 'Comm. Charm +1',
-        Body = 'Laksa. Frac +2',
-        Hands = 'Lanun Gants +3',--13
-        Ring1 = 'Crepuscular Ring',--3
-        Back = { Name = 'Camulus\'s Mantle', Augment = '"Snapshot"+10' },--10
-        Waist = 'Impulse Belt',--3
-        -- Legs = 'Ikenga\'s Trousers',--8
-        Legs = 'Lanun Trews +3',--10
-        Feet = 'Meg. Jam. +2',--10
-    },
-    Preshot_FlurryI = {--with flurry I on, gives 15
-    },
-    Preshot_FlurryII = {--with flurry II on, gives 30
-        Hands = 'Carmine Fin. Ga. +1',--8
-    },
-    Midshot = {
-        Ammo = 'Decimating Bullet',
-        Head = 'Malignance Chapeau',
-        Neck = 'Iskur Gorget',
-        Ear1 = 'Telos Earring',
-        Ear2 = 'Enervating Earring',
-        Body = 'Laksa. Frac +2',
-        Hands = 'Malignance Gloves',
-        Ring1 = 'Dingir Ring',
-        Ring2 = 'Ilabrat Ring',
-        Back = { Name = 'Camulus\'s Mantle', Augment = { [1] = 'Rng.Acc.+20', [2] = '"Store TP"+10', [3] = 'AGI+20', [4] = 'Rng.Atk.+20' } },
-        Waist = 'Eschan Stone',
-        Legs = 'Ikenga\'s Trousers',
-        Feet = 'Nyame Sollerets',
-    },
-    Midshot_Acc = {
-        Ear1 = 'Telos Earring',
-        Ear2 = 'Crep. Earring',
-        Body = 'Laksa. Frac +2',
-        Ring2 = 'Crepuscular Ring',
-        Legs = 'Ikenga\'s Trousers',
-    },
-    TripleShot = {
-        Ammo = 'Decimating Bullet',
-        Body = 'Chasseur\'s Frac +1',
-        Hands = 'Lanun Gants +3',
-    },
-
-    Ws_Default = {
-        Head = 'Nyame Helm',
-        Neck = 'Fotia Gorget',
-        Body = 'Nyame Mail',
-        Hands = 'Nyame Gauntlets',
-        Ring1 = 'Petrov Ring',
-        Ring2 = 'Karieyh Ring +1',
-        Back = { Name = 'Camulus\'s Mantle', Augment = { [1] = 'Weapon skill damage +10%', [2] = 'Mag. Acc+20', [3] = 'AGI+30', [4] = 'Magic Damage +20' } },
-        Waist = 'Fotia Belt',
-        Legs = 'Nyame Flanchard',
-        Feet = 'Lanun Bottes +3',
-    },
-    Ws_Hybrid = {
-    },
-    Ws_Acc = {
-    },
-    WsObi = {--puts elemental obi on for leaden/wildfire under dark/fire situations
-        Waist = 'Hachirin-no-Obi',
-    },
-
-    Savage_Default = {
-        Neck = 'Fotia Gorget',
-        Ear1 = 'Telos Earring',
-        Ear2 = 'Moonshade Earring',
-        Hands = 'Chasseur\'s Gants +2',
-        Ring1 = 'Petrov Ring',
-        Ring2 = 'Karieyh Ring +1',
-        Back = { Name = 'Camulus\'s Mantle', Augment = { [1] = 'Weapon skill damage +10%', [2] = 'Mag. Acc+20', [3] = 'AGI+30', [4] = 'Magic Damage +20' } },
         Waist = 'Sailfi Belt +1',
-        Legs = 'Meg. Chausses +2',
-        Feet = 'Lanun Bottes +3',
-    },
-    Savage_Hybrid = {
-    },
-    Savage_Acc = {
-        Ear1 = 'Telos Earring',
+        Ear1 = 'Bladeborn Earring',
+        Ear2 = 'Steelflash Earring',
+        Ring1 = 'Mummu Ring',
+        Ring2 = 'Rajas Ring',
+        Back = "Camulus's Mantle",
     },
 
-    Evisceration_Default = {
-        Head = 'Adhemar Bonnet +1',
-        Neck = 'Fotia Gorget',
-        Ear1 = 'Odr Earring',
-        Ear2 = 'Mache Earring +1',
-        -- Body = 'Mummu Jacket +2',
-        Hands = 'Adhemar Wrist. +1',
-        Ring1 = 'Ilabrat Ring',
-        Ring2 = 'Begrudging Ring',
-        Waist = 'Fotia Belt',
-        -- Legs = 'Mummu Kecks +2',
-        -- Feet = 'Mummu Gamash. +2',
-    },
-    Evisceration_Hybrid = {
-    },
-    Evisceration_Acc = {
-        Head = 'Blistering Sallet +1',
-    },
+    ------------------------------------------------------------
+    -- Defense / PDT set. Uncomment this and the toggle in HandleDefault.
+    ------------------------------------------------------------
+    -- Pdt = {
+    -- },
 
-    Aedge_Default = {
-        Ammo = 'Animikii Bullet',
-        Head = 'Nyame Helm',
-        Neck = 'Baetyl Pendant',
-        Ear1 = 'Friomisi Earring',
-        Ear2 = 'Crematio Earring',
-        Body = 'Laksa. Frac +2',
-        Hands = 'Carmine Fin. Ga. +1',
-        Ring1 = 'Dingir Ring',
-        Ring2 = 'Karieyh Ring +1',
-        Back = { Name = 'Camulus\'s Mantle', Augment = { [1] = 'Weapon skill damage +10%', [2] = 'Mag. Acc+20', [3] = 'AGI+30', [4] = 'Magic Damage +20' } },
-        Waist = 'Eschan Stone',
-        Legs = 'Nyame Flanchard',
-        Feet = 'Lanun Bottes +3',
-    },
-    Aedge_Hybrid = {
-    },
-    Aedge_Acc = {
-    },
+    ------------------------------------------------------------
+    -- Fast Cast set (spell precast). Uncomment this and the line in HandlePrecast.
+    ------------------------------------------------------------
+    -- Precast_FC = {
+    -- },
 
-    Laststand_Default = {
-        Head = 'Lanun Tricorne +2',
-        Neck = 'Fotia Gorget',
-        Ear1 = 'Telos Earring',
-        Ear2 = 'Moonshade Earring',
-        Body = 'Meg. Cuirie +2',
-        Hands = 'Chasseur\'s Gants +2',
-        Ring1 = 'Dingir Ring',
-        Ring2 = 'Karieyh Ring +1',
-        Back = { Name = 'Camulus\'s Mantle', Augment = { [1] = 'Weapon skill damage +10%', [2] = 'Mag. Acc+20', [3] = 'AGI+30', [4] = 'Magic Damage +20' } },
-        Waist = 'Fotia Belt',
-        Legs = 'Meg. Chausses +2',
-        Feet = 'Lanun Bottes +3',
-    },
-    Laststand_Hybrid = {
-    },
-    Laststand_Acc = {
-    },
+    ------------------------------------------------------------
+    -- Ranged precast (Snapshot / ranged delay reduction).
+    -- Uncomment this and the line in HandlePreshot.
+    ------------------------------------------------------------
+    -- Preshot = {
+    -- },
 
-    Wildfire_Default = {
-        Ammo = 'Living Bullet',
-        Head = 'Adhemar Bonnet +1',
-        Neck = 'Comm. Charm +1',
-        Ear1 = 'Friomisi Earring',
-        Ear2 = 'Crematio Earring',
-        Body = 'Lanun Frac +3',
-        Hands = 'Carmine Fin. Ga. +1',
-        Ring1 = 'Dingir Ring',
-        Ring2 = 'Karieyh Ring +1',
-        Back = { Name = 'Camulus\'s Mantle', Augment = { [1] = 'Weapon skill damage +10%', [2] = 'Mag. Acc+20', [3] = 'AGI+30', [4] = 'Magic Damage +20' } },
-        Waist = 'Eschan Stone',
-        Legs = 'Nyame Flanchard',
-        Feet = 'Lanun Bottes +3',
-    },
-    Wildfire_Hybrid = {
-    },
-    Wildfire_Acc = {
-        Ear2 = 'Digni. Earring',
-    },
-
-    Leaden_Default = {
-        Ammo = 'Living Bullet',
-        Head = 'Pixie Hairpin +1',
-        Neck = 'Comm. Charm +1',
-        Ear1 = 'Friomisi Earring',
-        Ear2 = 'Moonshade Earring',
-        Body = 'Lanun Frac +3',
-        Hands = 'Carmine Fin. Ga. +1',
-        Ring1 = 'Dingir Ring',
-        Ring2 = 'Archon Ring',
-        Back = { Name = 'Camulus\'s Mantle', Augment = { [1] = 'Weapon skill damage +10%', [2] = 'Mag. Acc+20', [3] = 'AGI+30', [4] = 'Magic Damage +20' } },
-        Waist = 'Eschan Stone',
-        -- Waist = 'Svelt. Gouriz +1',
-        Legs = 'Nyame Flanchard',
-        Feet = 'Lanun Bottes +3',
-    },
-    Leaden_Hybrid = {
-    },
-    Leaden_Acc = {
-        Ear2 = 'Digni. Earring',
-        Waist = 'Eschan Stone',
-    },
-
-    QD = {
-        Ammo = 'Living Bullet',
-        Head = 'Laksa. Tricorne +1',
-        Neck = 'Baetyl Pendant',
-        Ear1 = 'Friomisi Earring',
-        Ear2 = 'Crematio Earring',
-        Body = 'Lanun Frac +3',
-        Hands = 'Carmine Fin. Ga. +1',
-        Ring1 = 'Dingir Ring',
-        Ring2 = 'Metamor. Ring +1',
-        Back = { Name = 'Camulus\'s Mantle', Augment = { [1] = 'Weapon skill damage +10%', [2] = 'Mag. Acc+20', [3] = 'AGI+30', [4] = 'Magic Damage +20' } },
-        Waist = 'Eschan Stone',
-        Legs = 'Nyame Flanchard',
-        Feet = 'Chass. Bottes +1',
-    },
-    QD_Acc = {--with AF 2/3 and regal is better
-        Ammo = 'Living Bullet',
-        Head = 'Malignance Chapeau',
+    ------------------------------------------------------------
+    -- General Weapon Skill set.
+    ------------------------------------------------------------
+    Ws_Default = {
+        Head = 'Mummu Bonnet +1',
+        Body = 'Mummu Jacket +1',
+        Hands = 'Meg. Gloves +1',
+        Legs = 'Mummu Kecks +1',
+        Feet = 'Mummu Gamash. +1',
         Neck = 'Sanctity Necklace',
-        Ear2 = 'Crep. Earring',
-        Body = 'Nyame Mail',
-        Hands = 'Malignance Gloves',
-        Ring1 = 'Crepuscular Ring',
-        Ring2 = 'Metamor. Ring +1',
-        Legs = 'Nyame Flanchard',
-        Feet = 'Chass. Bottes +1',
+        Waist = 'Sailfi Belt +1',
+        Ear1 = { Name = 'Moonshade Earring', Augment = { [1] = 'Accuracy+4', [2] = 'TP Bonus +250' } },
+        Ear2 = 'Steelflash Earring',
+        Ring1 = 'Mummu Ring',
+        Ring2 = 'Rajas Ring',
+        Back = "Camulus's Mantle",
     },
-    Rolls = { -- it will put on ur DT gear set first then layer this set on for phantom roll (not dbl up), use /dt if you think you need to lock dt set while rolling
-        Main = 'Lanun Knife',
-        Range = 'Compensator',
-        Head = 'Lanun Tricorne +2',
-        Hands = 'Chasseur\'s Gants +2',
-        Back = 'Camulus\'s Mantle',
-    },
-    Fold = {Hands = 'Lanun Gants +3'},
-    WildCard = {Feet = 'Lanun Bottes +3'},
-    RandomDeal = {Body = 'Lanun Frac +3'},
-    SnakeEye = {Legs = 'Lanun Trews +3'},
-    TH = {
-		Waist = 'Chaac Belt',
-        Feet = { Name = 'Herculean Boots', Augment = { [1] = 'Potency of "Cure" effect received+5%', [2] = 'Mag. Acc.+19', [3] = 'Accuracy+21', [4] = '"Mag. Atk. Bns."+19', [5] = '"Treasure Hunter"+2' } },
-	},
-    Movement = {Legs = 'Carmine Cuisses +1'},
+
+    ------------------------------------------------------------
+    -- Specific Weapon Skill set example (e.g. Last Stand, Leaden Salute).
+    -- Uncomment this and the matching block in HandleWeaponskill.
+    ------------------------------------------------------------
+    -- Ws_LastStand = {
+    -- },
+
+    ------------------------------------------------------------
+    -- Ranged attack set (midshot: Store TP / Rapid Shot / ranged acc).
+    -- Uncomment this and the line in HandleMidshot.
+    ------------------------------------------------------------
+    -- Midshot = {
+    -- },
+
+    ------------------------------------------------------------
+    -- General spell midcast set. Uncomment this and the line in HandleMidcast.
+    ------------------------------------------------------------
+    -- Midcast = {
+    -- },
+
+    ------------------------------------------------------------
+    -- Specific magic-type / spell midcast example (e.g. Healing Magic).
+    -- Uncomment this and the matching block in HandleMidcast.
+    ------------------------------------------------------------
+    -- Midcast_Healing = {
+    -- },
+
+    ------------------------------------------------------------
+    -- Phantom Roll / Quick Draw ability sets (COR-specific).
+    -- Uncomment these and the matching blocks in HandleAbility.
+    ------------------------------------------------------------
+    -- Roll = {
+    -- },
+    -- QuickDraw = {
+    -- },
 };
 profile.Sets = sets;
 
-profile.Packer = {
-    {Name = 'Decimating Bullet', Quantity = 'all'},
-    {Name = 'Dec. Bul. Pouch', Quantity = 'all'},
-    {Name = 'Trump Card', Quantity = 'all'},
-    {Name = 'Trump Card Case', Quantity = 'all'},
-};
-
+------------------------------------------------------------
+-- Load / Unload
+------------------------------------------------------------
 profile.OnLoad = function()
-	gSettings.AllowAddSet = true;
-    gcinclude.Initialize();
+    gSettings.AllowAddSet = true;   -- lets you build sets in game with /lac addset
 
-    AshitaCore:GetChatManager():QueueCommand(1, '/macro book 10');
-    AshitaCore:GetChatManager():QueueCommand(1, '/macro set 10');
-
-    gcinclude.settings.RefreshGearMPP = 50;
-    gcinclude.CORmsg = false; -- set this to false if you do not want to see lucky/unlucky # messages, can also do /cormsg in game to change on the fly
+    -- Macros / lockstyle (uncomment and set your own numbers):
+    -- AshitaCore:GetChatManager():QueueCommand(1, '/macro book 1');
+    -- AshitaCore:GetChatManager():QueueCommand(1, '/macro set 1');
+    -- AshitaCore:GetChatManager():QueueCommand(1, '/lockstyleset 1');
 end
 
 profile.OnUnload = function()
-    gcinclude.Unload();
 end
 
 profile.HandleCommand = function(args)
-    gcinclude.HandleCommands(args);
+    -- Custom commands forwarded with  /lac fwd <name>  go here.
+    -- Example PDT toggle (uncomment sets.Pdt and the HandleDefault block too):
+    -- if (string.lower(args[1] or '') == 'dt') then
+    --     PdtOn = not PdtOn;
+    --     print('[COR] PDT: ' .. (PdtOn and '[On]' or '[Off]'));
+    -- end
 end
 
+------------------------------------------------------------
+-- Idle / Engaged
+------------------------------------------------------------
 profile.HandleDefault = function()
-    gFunc.EquipSet(sets.Idle);
-    if gcdisplay.GetToggle('TPgun') == true then
-        gFunc.EquipSet(sets.Idle_TPgun);
-    end
-	
-	local player = gData.GetPlayer();
+    local player = gData.GetPlayer();
+
+    -- Idle (uncomment once sets.Idle exists):
+    -- gFunc.EquipSet(sets.Idle);
+
     if (player.Status == 'Engaged') then
-        gFunc.EquipSet(sets.Tp_Default)
-        if (gcdisplay.GetCycle('MeleeSet') ~= 'Default') then
-			gFunc.EquipSet('Tp_' .. gcdisplay.GetCycle('MeleeSet')) end
-		if (gcdisplay.GetToggle('TH') == true) then gFunc.EquipSet(sets.TH) end
-    elseif (player.Status == 'Resting') then
-        gFunc.EquipSet(sets.Resting);
-    elseif (player.IsMoving == true) then
-		gFunc.EquipSet(sets.Movement);
+        gFunc.EquipSet(sets.Tp_Default);
     end
-	
-    gcinclude.CheckDefault ();
-    if (gcdisplay.GetToggle('DTset') == true) then gFunc.EquipSet(sets.Dt) end;
-    if (gcdisplay.GetToggle('Kite') == true) then gFunc.EquipSet(sets.Movement) end;
+
+    -- Defense toggle (uncomment once sets.Pdt and the PdtOn toggle exist):
+    -- if (PdtOn == true) then gFunc.EquipSet(sets.Pdt); end
 end
 
+------------------------------------------------------------
+-- Spell precast (Fast Cast)
+------------------------------------------------------------
+profile.HandlePrecast = function()
+    -- Fast Cast (uncomment once sets.Precast_FC exists):
+    -- gFunc.EquipSet(sets.Precast_FC);
+end
+
+------------------------------------------------------------
+-- Spell midcast
+------------------------------------------------------------
+profile.HandleMidcast = function()
+    -- local spell = gData.GetAction();
+
+    -- General casting set (uncomment once sets.Midcast exists):
+    -- gFunc.EquipSet(sets.Midcast);
+
+    -- Specific magic-type set (uncomment sets.Midcast_Healing too):
+    -- if (spell.Skill == 'Healing Magic') then gFunc.EquipSet(sets.Midcast_Healing); end
+end
+
+------------------------------------------------------------
+-- Ranged precast (Snapshot)
+------------------------------------------------------------
+profile.HandlePreshot = function()
+    -- Uncomment once sets.Preshot exists:
+    -- gFunc.EquipSet(sets.Preshot);
+end
+
+------------------------------------------------------------
+-- Ranged midshot (the actual shot)
+------------------------------------------------------------
+profile.HandleMidshot = function()
+    -- Uncomment once sets.Midshot exists:
+    -- gFunc.EquipSet(sets.Midshot);
+end
+
+------------------------------------------------------------
+-- Job abilities (Phantom Roll, Quick Draw, etc.)
+------------------------------------------------------------
 profile.HandleAbility = function()
-    local ability = gData.GetAction();
+    -- local ability = gData.GetAction();
 
-    if (ability.Name:contains('Roll')) then
-        gFunc.EquipSet(sets.Dt);
-        gFunc.EquipSet(sets.Rolls);
-        gcinclude.DoCORmsg(ability.Name);
-    elseif (ability.Name == 'Wild Card') then gFunc.EquipSet(sets.WildCard);
-    elseif (ability.Name == 'Fold') then gFunc.EquipSet(sets.Fold);
-    elseif (ability.Name == 'Random Deal') then gFunc.EquipSet(sets.RandomDeal);
-    elseif (ability.Name == 'Snake Eye') then gFunc.EquipSet(sets.SnakeEye);
-    elseif (ability.Name:contains('Shot')) and (ability.Name ~= 'Triple Shot') then
-        gFunc.EquipSet(sets.QD);
-        if (gcdisplay.GetCycle('Melee') == 'Acc') or (ability.Name == 'Dark Shot') or (ability.Name == 'Light Shot') then
-            gFunc.EquipSet(sets.QD_Acc);
-        end
-    end
+    -- Phantom Roll / Double-Up (uncomment sets.Roll too):
+    -- if (ability.Name == 'Phantom Roll' or ability.Name == 'Double-Up') then
+    --     gFunc.EquipSet(sets.Roll);
+    -- end
 
-    gcinclude.CheckCancels();
+    -- Quick Draw (uncomment sets.QuickDraw too):
+    -- if (ability.Name == 'Quick Draw') then
+    --     gFunc.EquipSet(sets.QuickDraw);
+    -- end
+end
+
+------------------------------------------------------------
+-- Weaponskills
+------------------------------------------------------------
+profile.HandleWeaponskill = function()
+    gFunc.EquipSet(sets.Ws_Default);
+
+    -- Specific weaponskill set example (uncomment sets.Ws_LastStand too):
+    -- local ws = gData.GetAction();
+    -- if (ws.Name == 'Last Stand') then gFunc.EquipSet(sets.Ws_LastStand); end
 end
 
 profile.HandleItem = function()
-    local item = gData.GetAction();
-
-	if string.match(item.Name, 'Holy Water') then gFunc.EquipSet(gcinclude.sets.Holy_Water) end
-end
-
-profile.HandlePrecast = function()
-    local spell = gData.GetAction();
-    gFunc.EquipSet(sets.Precast);
-
-    gcinclude.CheckCancels();
-end
-
-profile.HandleMidcast = function()
-    local weather = gData.GetEnvironment();
-    local spell = gData.GetAction();
-    local target = gData.GetActionTarget();
-
-    if (spell.Skill == 'Enhancing Magic') then
-        gFunc.EquipSet(sets.Enhancing);
-    elseif (spell.Skill == 'Healing Magic') then
-        gFunc.EquipSet(sets.Cure);
-    elseif (spell.Skill == 'Elemental Magic') then
-        gFunc.EquipSet(sets.Nuke);
-        if (spell.Element == weather.WeatherElement) or (spell.Element == weather.DayElement) then
-            gFunc.Equip('Waist', 'Hachirin-no-Obi');
-        end
-    elseif (spell.Skill == 'Enfeebling Magic') then
-        gFunc.EquipSet(sets.Enfeebling);
-    elseif (spell.Skill == 'Dark Magic') then
-        gFunc.EquipSet(sets.Macc);
-        if (string.contains(spell.Name, 'Aspir') or string.contains(spell.Name, 'Drain')) then
-            gFunc.EquipSet(sets.Drain);
-        end
-    end
-	if (gcdisplay.GetToggle('TH') == true) then gFunc.EquipSet(sets.TH) end
-end
-
-profile.HandlePreshot = function()
-    local flurryI = gData.GetBuffCount(265);
-    local flurryII = gData.GetBuffCount(581);
-
-    gFunc.EquipSet(sets.Preshot);
-
-    if flurryII > 0 then
-        gFunc.EquipSet(sets.Preshot_FlurryII);
-    elseif flurryI > 0 then
-        gFunc.EquipSet(sets.Preshot_FlurryI);
-    end
-end
-
-profile.HandleMidshot = function()
-    local triple = gData.GetBuffCount('Triple Shot');
-    gFunc.EquipSet(sets.Midshot);
-
-    if triple > 0 then
-        gFunc.EquipSet(sets.TripleShot);
-    end
-
-    if (gcdisplay.GetCycle('MeleeSet') == 'Acc') then
-        gFunc.EquipSet(sets.Midshot_Acc);
-    end
-	if (gcdisplay.GetToggle('TH') == true) then gFunc.EquipSet(sets.TH) end
-end
-
-profile.HandleWeaponskill = function()
-    local canWS = gcinclude.CheckWsBailout();
-    if (canWS == false) then gFunc.CancelAction() return;
-    else
-        local ws = gData.GetAction();
-        local weather = gData.GetEnvironment();
-    
-        gFunc.EquipSet(sets.Ws_Default)
-        if (gcdisplay.GetCycle('MeleeSet') ~= 'Default') then
-        gFunc.EquipSet('Ws_' .. gcdisplay.GetCycle('MeleeSet')) end
-        
-        if string.match(ws.Name, 'Savage Blade') then
-            gFunc.EquipSet(sets.Savage_Default)
-            if (gcdisplay.GetCycle('MeleeSet') ~= 'Default') then
-            gFunc.EquipSet('Savage_' .. gcdisplay.GetCycle('MeleeSet')); end
-        elseif string.match(ws.Name, 'Evisceration') then
-            gFunc.EquipSet(sets.Evisceration_Default)
-            if (gcdisplay.GetCycle('MeleeSet') ~= 'Default') then
-            gFunc.EquipSet('Evisceration_' .. gcdisplay.GetCycle('MeleeSet')); end
-        elseif string.match(ws.Name, 'Aeolian Edge') then
-            gFunc.EquipSet(sets.Aedge_Default)
-            if (gcdisplay.GetCycle('MeleeSet') ~= 'Default') then
-            gFunc.EquipSet('Aedge_' .. gcdisplay.GetCycle('MeleeSet')); end
-             if (gcdisplay.GetCycle('MeleeSet') == 'Default') then gcinclude.DoMoonshade() end;
-        elseif string.match(ws.Name, 'Last Stand') then
-            gFunc.EquipSet(sets.Laststand_Default)
-            if (gcdisplay.GetCycle('MeleeSet') ~= 'Default') then
-            gFunc.EquipSet('Laststand_' .. gcdisplay.GetCycle('MeleeSet')); end
-        elseif string.match(ws.Name, 'Wildfire') then
-            gFunc.EquipSet(sets.Wildfire_Default)
-            if (gcdisplay.GetCycle('MeleeSet') ~= 'Default') then
-            gFunc.EquipSet('Wildfire_' .. gcdisplay.GetCycle('MeleeSet')); end
-            if (weather.DayElement == 'Fire' or weather.RawWeatherElement == 'Fire') then gFunc.EquipSet(sets.WsObi) end
-        elseif string.match(ws.Name, 'Leaden Salute') then
-            gFunc.EquipSet(sets.Leaden_Default)
-            if (gcdisplay.GetCycle('MeleeSet') ~= 'Default') then
-            gFunc.EquipSet('Leaden_' .. gcdisplay.GetCycle('MeleeSet')); end
-            if (gcdisplay.GetCycle('MeleeSet') == 'Default') then gcinclude.DoMoonshade() end;
-            if (weather.DayElement == 'Dark' or weather.RawWeatherElement == 'Dark') then gFunc.EquipSet(sets.WsObi) end
-        end
-    end
 end
 
 return profile;

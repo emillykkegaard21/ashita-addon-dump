@@ -18,12 +18,12 @@ local C                 = ffi.C
 -- Main (target) cursor
 local filepathForCursor    = 'edit/anc_gold_6frame.png'  -- 6-frame strip (192x32)
 local cursorFrames         = 6                            -- number of frames in the strip
-local cursorFps            = 12                 -- frames per second
+local cursorFps            = 8                 -- frames per second
 
 -- Sub (subtarget) cursor
 local filepathForCursorSub = 'edit/anc_azure_6frame.png'  -- 6-frame strip (192x32)
 local cursorFramesSub      = 6
-local cursorFpsSub         = 12
+local cursorFpsSub         = 8
 
 -- Size of a SINGLE frame (both strips use 32x32 cells)
 local cursorWidth          = 32
