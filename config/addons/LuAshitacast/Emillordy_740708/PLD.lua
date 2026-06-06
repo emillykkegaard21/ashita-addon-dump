@@ -1,5 +1,5 @@
 local profile = {};
-gcinclude = gFunc.LoadFile('common\\gcinclude.lua');
+
 ------------------------------------------------------------
 -- Gear sets
 -- You only have these three for now. Everything below this
@@ -67,22 +67,47 @@ profile.OnLoad = function()
     gSettings.AllowAddSet = true;   -- lets you keep using /lac addset to build new sets
     AshitaCore:GetChatManager():QueueCommand(1, '/macro book 11');
     AshitaCore:GetChatManager():QueueCommand(1, '/macro set 10');
+
+    -- Convenience alias so you can just type  /warp
+    AshitaCore:GetChatManager():QueueCommand(-1, '/alias /warp /lac fwd warp');
 end
 
 profile.OnUnload = function()
+    AshitaCore:GetChatManager():QueueCommand(-1, '/alias del /warp');
 end
 
 ------------------------------------------------------------
 -- Custom commands forwarded with  /lac fwd ...
 ------------------------------------------------------------
 profile.HandleCommand = function(args)
-    if (args[1] == 'tank') then
+    local cmd = string.lower(args[1] or '');
+
+    if (cmd == 'tank') then
         tankMode = not tankMode;
         if (tankMode) then
             print('[PLD] Engaged set: TankingLow (defense)');
         else
             print('[PLD] Engaged set: TP (offense)');
         end
+
+    elseif (cmd == 'warp') then
+        -- The Warp Ring has a ~10s equip delay before it can be used, so we
+        -- equip it, lock the slot so idle/engaged swaps can't strip it while
+        -- it charges, wait out the delay, use it, then unlock.
+        local mgr = AshitaCore:GetChatManager();
+        mgr:QueueCommand(1, '/lac equip ring2 "Warp Ring"'); -- put the ring on
+        mgr:QueueCommand(1, '/lac disable ring2');           -- lock the slot
+
+        local function fire()
+            AshitaCore:GetChatManager():QueueCommand(1, '/item "Warp Ring" <me>'); -- ring is ready, use it
+            local function restore()
+                AshitaCore:GetChatManager():QueueCommand(1, '/lac enable ring2');  -- unlock; normal gear returns
+            end
+            restore:once(8); -- after the warp's cast finishes
+        end
+        fire:once(11); -- wait out the ring's equip/charge delay
+
+        print('[PLD] Warping... hold still for ~11s.');
     end
 end
 

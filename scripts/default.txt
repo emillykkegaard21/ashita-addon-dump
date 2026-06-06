@@ -28,6 +28,7 @@
 /load lootwhore
 /load nameplate
 /load uberwarp
+/load sequencer
 
 /addon load fps
 /addon load move
