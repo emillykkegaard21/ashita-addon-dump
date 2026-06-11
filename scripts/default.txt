@@ -29,6 +29,7 @@
 /load nameplate
 /load uberwarp
 /load sequencer
+/load stylist
 
 /addon load fps
 /addon load move
@@ -101,3 +102,5 @@
 /hideparty hide
 /pivot add remapster
 /pivot add ffxi-remapster-labeled-main
+/wait 6
+/sl load mystyle

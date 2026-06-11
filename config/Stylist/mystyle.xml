@@ -1,0 +1,14 @@
+<stylist>
+
+	<settings>
+		<noblinkself>true</noblinkself>
+		<noblinktarget>true</noblinktarget>
+		<noblinkothers>false</noblinkothers>
+	</settings>
+
+	<player name="Emillordy">
+		<main>21620</main>
+		<sub>21620</sub>
+	</player>
+
+</stylist>

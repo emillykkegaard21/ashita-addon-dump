@@ -113,21 +113,22 @@ function M.FindAbilityRecast(abilityId)
         return nil, 0;
     end
 
-    local resourceMgr = AshitaCore:GetResourceManager();
+    -- Resolve the ability's own recast timer ID (forward lookup, unambiguous).
+    -- The previous reverse lookup via GetAbilityByTimerId fails for abilities
+    -- that share a timer ID (e.g. SCH Addendum: White), because the reverse
+    -- lookup can only return one canonical ability per timer ID.
+    local ability = AshitaCore:GetResourceManager():GetAbilityById(abilityId);
+    if not ability then return nil, 0; end
+    local wantTimerId = ability.RecastTimerId;
 
-    -- Scan all recast slots to find matching ability
+    -- Scan all recast slots for the matching timer ID
     for i = 0, 31 do
         local slotTimerId = ashita.memory.read_uint8(AbilityRecastPointer + (i * 8) + 3);
 
         -- Skip empty slots (timer ID 0, except slot 0 which is 2-hour)
-        if slotTimerId > 0 or i == 0 then
-            -- Look up what ability uses this timer ID
-            local slotAbility = resourceMgr:GetAbilityByTimerId(slotTimerId);
-            if slotAbility and slotAbility.Id == abilityId then
-                -- Found matching ability - get its recast
-                local recast = ashita.memory.read_uint32(AbilityRecastPointer + (i * 4) + 0xF8);
-                return slotTimerId, recast;
-            end
+        if (slotTimerId > 0 or i == 0) and slotTimerId == wantTimerId then
+            local recast = ashita.memory.read_uint32(AbilityRecastPointer + (i * 4) + 0xF8);
+            return slotTimerId, recast;
         end
     end
 
