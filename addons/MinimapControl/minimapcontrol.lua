@@ -70,7 +70,7 @@ local hide_menus = T{
     -- auction house
     'auc[%d]',
     -- friend list / messages (communication)
-    'friend', 'msglist',
+    'friend', 'msglist','delivery', 'stringdl', 'trade', 'check',
 }
 
 local pEventSystem = ashita.memory.find('FFXiMain.dll', 0, 'A0????????84C0741AA1????????85C0741166A1????????663B05????????0F94C0C3', 0, 0)
