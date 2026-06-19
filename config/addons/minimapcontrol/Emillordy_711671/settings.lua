@@ -1,0 +1,33 @@
+require('common');
+
+local settings = T{ };
+settings["show_when"] = T{ };
+settings["opacity"] = T{ };
+settings["zoom"] = T{ };
+settings["debug_menus"] = false;
+settings["show_when"]["chat_expanded"] = false;
+settings["show_when"]["command_menu_open"] = true;
+settings["show_when"]["main_menu_open"] = true;
+settings["show_when"]["any_menu_open"] = false;
+settings["show_when"]["moving"] = true;
+settings["show_when"]["during_events"] = false;
+settings["show_when"]["auction_open"] = false;
+settings["show_when"]["map_open"] = false;
+settings["show_when"]["in_combat"] = false;
+settings["show_when"]["window_open"] = false;
+settings["default_zoom"] = 1;
+settings["opacity"]["arrow"] = 1;
+settings["opacity"]["monsters"] = 1;
+settings["opacity"]["map"] = 1;
+settings["opacity"]["frame"] = 1;
+settings["opacity"]["players"] = 1;
+settings["opacity"]["npcs"] = 1;
+settings["zoom"][249] = "1";
+settings["zoom"][126] = "0";
+settings["zoom"][230] = "1";
+settings["zoom"][291] = "0";
+settings["zoom"][102] = "1";
+settings["zoom"][257] = "1";
+settings["zoom"][288] = "0";
+
+return settings;

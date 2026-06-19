@@ -40,6 +40,7 @@ local minimapcontrol = {
     is_command_menu_open = false,
     is_auction_menu_open = false,
     is_hide_menu_open = false,
+    is_any_menu_open = false,
 }
 
 local pGameMenu = ashita.memory.find('FFXiMain.dll', 0, '8B480C85C974??8B510885D274??3B05', 16, 0)
@@ -204,6 +205,9 @@ minimapcontrol.update_menu_state = function()
             end
         end
     end
+
+    -- Any menu at all is open (game reports a non-empty menu name)
+    minimapcontrol.is_any_menu_open = menu_now ~= ''
 end
 
 minimapcontrol.update_visiblity = function()
@@ -233,8 +237,8 @@ minimapcontrol.update_visiblity = function()
         return
     end
 
-    -- Hide if (any) menu open
-    if not minimapcontrol.settings.show_when.any_menu_open and minimapcontrol.is_menu_open then
+    -- Always hide if any menu is open
+    if minimapcontrol.is_any_menu_open then
         minimapcontrol.visible = false
         return
     end
@@ -368,6 +372,7 @@ minimapcontrol.reset_state = function()
     minimapcontrol.is_command_menu_open = false
     minimapcontrol.is_auction_menu_open = false
     minimapcontrol.is_hide_menu_open = false
+    minimapcontrol.is_any_menu_open = false
 end
 
 ashita.events.register('load', 'minimapcontrol_load', function()
