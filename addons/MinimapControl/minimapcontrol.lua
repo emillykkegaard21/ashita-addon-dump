@@ -318,7 +318,10 @@ minimapcontrol.update_player_state = function()
 end
 
 minimapcontrol.set_zoom_level = function(zoom_level)
-    AshitaCore:GetChatManager():QueueCommand(1, '/minimap zoom ' .. zoom_level)
+    -- The minimap plugin always expects '.' as the decimal separator.
+    -- On locales like Danish, Lua may format numbers (and stored values may be) with ','.
+    local zoom_str = tostring(zoom_level):gsub(',', '.')
+    AshitaCore:GetChatManager():QueueCommand(1, '/minimap zoom ' .. zoom_str)
 end
 
 minimapcontrol.on_zone_changed = function(zone_id)
@@ -338,8 +341,11 @@ minimapcontrol.record_zoom_level = function()
     end
 
     for line in f:lines() do
-        local _, _, zoom_level = string.find(line, 'zoom[%s]*=[%s]*([%d%.]+)')
+        -- Accept either '.' or ',' as the decimal separator
+        local _, _, zoom_level = string.find(line, 'zoom[%s]*=[%s]*([%d%.,]+)')
         if zoom_level ~= nil then
+            -- Always store with '.' so it round-trips back to the plugin cleanly
+            zoom_level = zoom_level:gsub(',', '.')
             minimapcontrol.settings.zoom[minimapcontrol.zone_id] = zoom_level
             settings.save()
             break

@@ -43,7 +43,7 @@
 /addon load watchdog
 /addon load mipmap
 /addon load noname
-/addon load isntantchat
+/addon load instantchat
 /addon load minimapcontrol
 /addon load xiui
 /addon load mobdb

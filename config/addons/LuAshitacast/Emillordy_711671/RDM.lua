@@ -1,6 +1,8 @@
 local profile = {};
 gcinclude = gFunc.LoadFile('common\\gcinclude.lua');
 
+local weaponsLocked = false;
+
 local sets = {
     -- =========================================================
     --  IDLE / DEFENSIVE
@@ -9,23 +11,24 @@ local sets = {
         Ammo = 'Staunch Tathlum',
         Head = 'Aya. Zucchetto +2',
         Neck = 'Sanctity Necklace',
-        Ear1 = 'Eabani Earring',
-        Ear2 = 'Cessance Earring',
-        Body = 'Ayanmo Corazza +2',
-        Hands = 'Aya. Manopolas +2',
-        Ring1 = 'Gelatinous Ring +1',
-        Ring2 = 'Chirich Ring',
+        Ear1 = 'Alabaster Earring',
+        Ear2 = 'Eabani Earring',
+        Body = "CS Tunic +1",
+        Hands = "CSM Gloves +1",
+        Ring1 = 'Chirich Ring',
+        Ring2 = 'Murky Ring',
         Back = 'Sucellos\'s Cape',
         Waist = 'Grunfeld Rope',
-        Legs = 'Aya. Cosciales +2',
-        Feet = 'Aya. Gambieras +2',
+        Legs = "CS Slacks +1",
+        Feet = "CSM boots +1",
     },
     Resting = {},
     Idle_Regen = {
-        Neck = 'Sanctity Necklace',   -- "Regen" +2 (HP)
+        Ear1 = 'Infused Earring',
+        Ring2 = 'Chirich Ring',
     },
     Idle_Refresh = {
-        Body = 'Vrikodara Jupon',     -- "Refresh" +2 (also FC+5%, PDT-3%)
+        Body = 'Atrophy Tabard +1',
     },
 
     Town = {
@@ -34,7 +37,7 @@ local sets = {
         Body = 'Vrikodara Jupon',
         Hands = 'Aya. Manopolas +2',
         Ring1 = 'Chirich Ring',
-        Ring2 = 'Petrov Ring',
+        Ring2 = 'Murky Ring',
         Back = 'Sucellos\'s Cape',
         Waist = 'Grunfeld Rope',
         Legs = 'Jhakri Slops +1',
@@ -45,12 +48,12 @@ local sets = {
         Ammo = 'Staunch Tathlum',
         Head = 'Aya. Zucchetto +2',
         Neck = 'Sanctity Necklace',
-        Ear1 = 'Eabani Earring',
-        Ear2 = 'Cessance Earring',
+        Ear1 = 'Cessance Earring',
+        Ear2 = 'Eabani Earring',
         Body = 'Ayanmo Corazza +2',
         Hands = 'Aya. Manopolas +2',
         Ring1 = 'Gelatinous Ring +1',
-        Ring2 = 'Chirich Ring',
+        Ring2 = 'Murky Ring',
         Back = 'Sucellos\'s Cape',
         Waist = 'Grunfeld Rope',
         Legs = 'Aya. Cosciales +2',
@@ -58,16 +61,16 @@ local sets = {
     },
 
     -- =========================================================
-    --  TP / MELEE  (your provided set)
+    --  TP / MELEE
     -- =========================================================
     Tp_Default = {
         Ammo = 'Ginsen',
         Head = 'Aya. Zucchetto +2',
         Neck = 'Asperity Necklace',
-        Ear1 = 'Cessance Earring',
-        Ear2 = 'Eabani Earring',
+        Ear1 = 'Alabaster Earring',
+        Ear2 = 'Cessance Earring',
         Body = 'Ayanmo Corazza +2',
-        Hands = 'Aya. Manopolas +2',
+        Hands = 'Malignance Gloves',
         Ring1 = 'Chirich Ring',
         Ring2 = 'Petrov Ring',
         Back = 'Sucellos\'s Cape',
@@ -76,36 +79,49 @@ local sets = {
         Feet = 'Aya. Gambieras +2',
     },
     Tp_Hybrid = {
-        Ammo = 'Staunch Tathlum',        -- swaps DD ammo out for DT
-        Ring1 = 'Gelatinous Ring +1',    -- PDT -7%
+        Body = "CS Tunic +1",
+        Neck = 'Asperity Necklace',
+        Ear1 = 'Alabaster Earring',
+        Ring1 = 'Chirich Ring',
+        Ring2 = 'Murky Ring',
+        Hands = 'Malignance Gloves',
+        Legs = "CS Slacks +1",
+        Feet = "CSM boots +1",
     },
-    Tp_Acc = {},   -- Tp_Default already wears all your acc gear (Ginsen/Cessance/Chirich/Asperity); nothing left to swap in
+    Tp_Acc = {
+        Body = "CS Tunic +1",
+        Hands = "CSM Gloves +1",
+        Legs = "CS Slacks +1",
+        Feet = "CSM boots +1",
+    },
 
     -- =========================================================
     --  FAST CAST / PRECAST
     -- =========================================================
     Precast = {
-        Head = 'Atrophy Chapeau',   -- Enhances Fast Cast (~10%), Macc+15
-        Body = 'Vrikodara Jupon',   -- Fast Cast +5%
-        Waist = 'Embla Sash',       -- Fast Cast +5%
+        Head = 'Atrophy Chapeau +1',
+        Body = 'Vrikodara Jupon',
+        Hands = 'Atrophy Gloves +1',
+        Waist = 'Embla Sash',
+        Ring1 = 'Weather. Ring',
     },
     Cure_Precast = {},
     Enhancing_Precast = {},
     Stoneskin_Precast = {},
 
     -- =========================================================
-    --  HEALING MAGIC  (your provided Cure set)
+    --  HEALING MAGIC
     -- =========================================================
     Cure = {
         Ammo = 'Staunch Tathlum',
-        Head = 'Atrophy Chapeau',
+        Head = 'Atrophy Chapeau +1',
         Neck = 'Sanctity Necklace',
         Body = 'Vrikodara Jupon',
-        Hands = 'Aya. Manopolas +2',
-        Ring1 = 'Gelatinous Ring +1',
+        Hands = 'Atrophy Gloves +1',
+        Ring1 = 'Weather. Ring',
         Back = 'Sucellos\'s Cape',
         Waist = 'Embla Sash',
-        Legs = 'Atrophy Tights',
+        Legs = 'Atrophy Tights +1',
         Feet = 'Jhakri Pigaches +2',
     },
     Self_Cure = {},
@@ -113,132 +129,123 @@ local sets = {
     Cursna = {},
 
     -- =========================================================
-    --  ENHANCING MAGIC  (your provided Enhancing set)
-    --  Duelist's Torque duration bonus applies only if Oboro-augmented
+    --  ENHANCING MAGIC
     -- =========================================================
     Enhancing = {
-        Sub = 'Pukulatmuj',
+        Sub = 'Pukulatmuj +1',
         Ammo = 'Staunch Tathlum',
-        Head = 'Atrophy Chapeau',
-        Neck = 'Duelist\'s Torque',   -- Enh. duration +% (augment) over filler Asperity
-        Ear1 = 'Eabani Earring',
-        Body = 'Atrophy Tabard',
-        Hands = 'Aya. Manopolas +2',
-        Ring1 = 'Gelatinous Ring +1',
+        Head = 'Atrophy Chapeau +1',
+        Neck = 'Duelist\'s Torque',
+        Body = 'Atrophy Tabard +1',
+        Hands = 'Atrophy Gloves +1',
+        Ring1 = 'Weather. Ring',
         Back = 'Sucellos\'s Cape',
         Waist = 'Embla Sash',
-        Legs = 'Atrophy Tights',
+        Legs = 'Atrophy Tights +1',
         Feet = 'Jhakri Pigaches +2',
     },
     Self_Enhancing = {},
     Skill_Enhancing = {},
-    Stoneskin = {},
+    Stoneskin = {
+        Sub = 'Pukulatmuj +1',
+    },
     Phalanx = {},
     Refresh = {},
     Self_Refresh = {},
 
     -- =========================================================
-    --  ENFEEBLING MAGIC  (your provided Enfeebling set)
+    --  ENFEEBLING MAGIC
     -- =========================================================
     Enfeebling = {
         Ammo = 'Staunch Tathlum',
-        Head = 'Atrophy Chapeau',
-        Neck = 'Duelist\'s Torque',   -- Macc+20, Enfeeb skill +5 (beats Sanctity's Macc+10)
-        Body = 'Atrophy Tabard',
-        Hands = 'Aya. Manopolas +2',
-        Ring1 = 'Gelatinous Ring +1',
+        Head = 'Atrophy Chapeau +1',
+        Neck = 'Duelist\'s Torque',
+        Body = "CS Tunic +1",
+        Hands = "CSM Gloves +1",
+        Ring1 = 'Weather. Ring',
         Back = 'Sucellos\'s Cape',
         Waist = 'Embla Sash',
-        Legs = 'Atrophy Tights',
-        Feet = 'Jhakri Pigaches +2',
+        Legs = "CS Slacks +1",
+        Feet = "CSM boots +1",
     },
     EnfeeblingACC = {
-        Neck = 'Duelist\'s Torque',   -- Macc+20; also carries "Dispel"+1 onto Dispel casts (Dark Magic routes here)
-        Hands = 'Jhakri Cuffs +2',    -- magic accuracy over melee Aya. Manopolas
+        Neck = 'Duelist\'s Torque',
+        Hands = 'Jhakri Cuffs +2',
     },
     Mind_Enfeebling = {},
     Int_Enfeebling = {},
     Potency_Enfeebling = {},
 
     -- =========================================================
-    --  DARK MAGIC (Drain/Aspir) - built from your Jhakri pieces
+    --  DARK MAGIC (Drain/Aspir)
     -- =========================================================
     Drain = {
         Ammo = 'Staunch Tathlum',
-        Head = 'Atrophy Chapeau',
-        Neck = 'Duelist\'s Torque',   -- Macc+20 to land Aspir/Drain
-        Ear1 = 'Eabani Earring',
-        Ear2 = 'Cessance Earring',
-        Body = 'Atrophy Tabard',
-        Hands = 'Jhakri Cuffs +2',
-        Ring1 = 'Chirich Ring',
+        Head = 'Atrophy Chapeau +1',
+        Neck = 'Duelist\'s Torque',
+        Body = "CS Tunic +1",
+        Hands = "CSM Gloves +1",
+        Ring1 = 'Weather. Ring',
         Ring2 = 'Petrov Ring',
         Back = 'Sucellos\'s Cape',
         Waist = 'Embla Sash',
-        Legs = 'Jhakri Slops +1',
-        Feet = 'Jhakri Pigaches +2',
+        Legs = "CS Slacks +1",
+        Feet = "CSM boots +1",
     },
 
     -- =========================================================
-    --  ELEMENTAL MAGIC (Nuke) - built from your Jhakri pieces
-    --  Keeps Sanctity (MAB+10) since Duelist's has no Magic Atk. Bonus
+    --  ELEMENTAL MAGIC (Nuke)
     -- =========================================================
     Nuke = {
         Ammo = 'Staunch Tathlum',
-        Head = 'Atrophy Chapeau',
+        Head = 'Atrophy Chapeau +1',
         Neck = 'Sanctity Necklace',
-        Ear1 = 'Cessance Earring',
-        Ear2 = 'Eabani Earring',
-        Body = 'Atrophy Tabard',      -- MAB+7, Macc+7 (beats Vrikodara for nuking)
-        Hands = 'Jhakri Cuffs +2',
+        Body = "CS Tunic +1",
+        Hands = "CSM Gloves +1",
         Ring1 = 'Chirich Ring',
         Ring2 = 'Petrov Ring',
         Back = 'Sucellos\'s Cape',
         Waist = 'Grunfeld Rope',
-        Legs = 'Jhakri Slops +1',
-        Feet = 'Jhakri Pigaches +2',
+        Legs = "CS Slacks +1",
+        Feet = "CSM boots +1",
     },
     NukeACC = {},
     Burst = {},
     Helix = {},
     Mp_Body = {
-        Body = 'Vrikodara Jupon',   -- MP+59 + Refresh; auto-equips when nuking under 40% MP
+        Body = 'Vrikodara Jupon',
     },
 
     -- =========================================================
-    --  RANGED (RDM doesn't really use this - left empty)
+    --  RANGED
     -- =========================================================
     Preshot = {},
     Midshot = {},
 
     -- =========================================================
-    --  WEAPONSKILLS  (your provided Ws_Default set)
-    --  Fotia Gorget: fTP + WS acc on any skillchain WS
+    --  WEAPONSKILLS
     -- =========================================================
     Ws_Default = {
         Ammo = 'Ginsen',
         Head = 'Aya. Zucchetto +2',
         Neck = 'Fotia Gorget',
-        Ear1 = 'Eabani Earring',
         Ear2 = { Name = 'Moonshade Earring', Augment = { [1] = 'Accuracy+4', [2] = 'TP Bonus +250' } },
         Body = 'Ayanmo Corazza +2',
         Hands = 'Jhakri Cuffs +2',
-        Ring1 = 'Gelatinous Ring +1',
-        Ring2 = 'Karieyh Ring',
         Back = 'Sucellos\'s Cape',
         Waist = 'Grunfeld Rope',
-        Legs = 'Aya. Cosciales +2',
-        Feet = 'Aya. Gambieras +2',
+        Legs = 'Jhakri slops +1',
+        Feet = 'Jhakri Pigaches +2'
     },
     Ws_Hybrid = {
-        Ammo = 'Staunch Tathlum',        -- Ws_Default already wears the PDT ring; add DT ammo
+        Ammo = 'Staunch Tathlum',
     },
     Ws_Acc = {
-        Ear1 = 'Cessance Earring',       -- Acc+6 over Eabani
-        Ring1 = 'Chirich Ring',          -- Acc over Gelatinous
+        Ear1 = 'Cessance Earring',
+        Ring1 = 'Chirich Ring',
     },
 
-    -- Savage Blade (STR/MND) - Moonshade for the TP bonus
+    -- Savage Blade
     Savage_Default = {
         Ammo = 'Ginsen',
         Head = 'Aya. Zucchetto +2',
@@ -251,18 +258,18 @@ local sets = {
         Ring2 = 'Petrov Ring',
         Back = 'Sucellos\'s Cape',
         Waist = 'Grunfeld Rope',
-        Legs = 'Aya. Cosciales +2',
-        Feet = 'Aya. Gambieras +2',
+        Legs = 'Jhakri slops +1',
+        Feet = 'Jhakri Pigaches +2',
     },
     Savage_Hybrid = {
         Ammo = 'Staunch Tathlum',
-        Ring1 = 'Gelatinous Ring +1',    -- PDT over Karieyh
+        Ring1 = 'Gelatinous Ring +1',
     },
     Savage_Acc = {
-        Ring1 = 'Chirich Ring',          -- Acc over Karieyh
+        Ring1 = 'Chirich Ring',
     },
 
-    -- Chant du Cygne (DEX/crit/multihit)
+    -- Chant du Cygne
     Chant_Default = {
         Ammo = 'Ginsen',
         Head = 'Aya. Zucchetto +2',
@@ -280,21 +287,21 @@ local sets = {
     },
     Chant_Hybrid = {
         Ammo = 'Staunch Tathlum',
-        Ring1 = 'Gelatinous Ring +1',    -- PDT over Petrov
+        Ring1 = 'Gelatinous Ring +1',
     },
     Chant_Acc = {
-        Ring1 = 'Chirich Ring',          -- Acc over Petrov
+        Ring1 = 'Chirich Ring',
     },
 
     -- =========================================================
     --  MISC
     -- =========================================================
-    CS = {},                                 -- no Chainspell-specific gear owned
+    CS = {},
     TH = {
-        Ammo = 'Per. Lucky Egg',     -- TH +1
-        Head = 'Wh. Rarab Cap +1',   -- TH +1
+        Ammo = 'Per. Lucky Egg',
+        Head = 'Wh. Rarab Cap +1',
     },
-    Movement = {},   -- no movement-speed piece in your inventory
+    Movement = {},
 };
 profile.Sets = sets;
 
@@ -321,22 +328,38 @@ end
 
 profile.HandleDefault = function()
     gFunc.EquipSet(sets.Idle);
-	
-	local player = gData.GetPlayer();
+
+    local player = gData.GetPlayer();
     if (player.Status == 'Engaged') then
         gFunc.EquipSet(sets.Tp_Default)
         if (gcdisplay.GetCycle('MeleeSet') ~= 'Default') then
-			gFunc.EquipSet('Tp_' .. gcdisplay.GetCycle('MeleeSet')) end
-		if (gcdisplay.GetToggle('TH') == true) then gFunc.EquipSet(sets.TH) end
-        if (gcdisplay.GetToggle('Fight') == false) then
-            AshitaCore:GetChatManager():QueueCommand(1, '/fight') end
-    elseif (player.Status == 'Resting') then
-        gFunc.EquipSet(sets.Resting);
-    elseif (player.IsMoving == true) then
-		gFunc.EquipSet(sets.Movement);
+            gFunc.EquipSet('Tp_' .. gcdisplay.GetCycle('MeleeSet')) end
+        if (gcdisplay.GetToggle('TH') == true) then gFunc.EquipSet(sets.TH) end
+
+        -- lock weapon slots ONCE on engage
+        if (weaponsLocked == false) then
+            AshitaCore:GetChatManager():QueueCommand(-1, '/lac disable Main');
+            AshitaCore:GetChatManager():QueueCommand(-1, '/lac disable Sub');
+            AshitaCore:GetChatManager():QueueCommand(-1, '/lac disable Range');
+            weaponsLocked = true;
+        end
+    else
+        -- unlock weapon slots ONCE when we stop fighting
+        if (weaponsLocked == true) then
+            AshitaCore:GetChatManager():QueueCommand(-1, '/lac enable Main');
+            AshitaCore:GetChatManager():QueueCommand(-1, '/lac enable Sub');
+            AshitaCore:GetChatManager():QueueCommand(-1, '/lac enable Range');
+            weaponsLocked = false;
+        end
+
+        if (player.Status == 'Resting') then
+            gFunc.EquipSet(sets.Resting);
+        elseif (player.IsMoving == true) then
+            gFunc.EquipSet(sets.Movement);
+        end
     end
-	
-    gcinclude.CheckDefault ();
+
+    gcinclude.CheckDefault();
     if (gcdisplay.GetToggle('DTset') == true) then gFunc.EquipSet(sets.Dt) end;
     if (gcdisplay.GetToggle('Kite') == true) then gFunc.EquipSet(sets.Movement) end;
 end
@@ -442,7 +465,7 @@ profile.HandleMidcast = function()
             gFunc.EquipSet(sets.Potency_Enfeebling);
         end
     elseif (spell.Skill == 'Dark Magic') then
-        gFunc.EquipSet(sets.EnfeeblingACC); -- mostly MACC anyways; Duelist's Torque here gives Dispel its "Dispel"+1
+        gFunc.EquipSet(sets.EnfeeblingACC);
         if (string.contains(spell.Name, 'Aspir') or string.contains(spell.Name, 'Drain')) then
             gFunc.EquipSet(sets.Drain);
         end
